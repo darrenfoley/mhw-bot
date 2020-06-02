@@ -34,6 +34,13 @@ class MHW:
       await ctx.send(phrase)
 
 
+    @self._client.command(name='activity')
+    @commands.is_owner()
+    async def _activity(ctx, *, activity_name):
+      activity = discord.Activity(type=discord.ActivityType.listening, name=activity_name)
+      await self._client.change_presence(activity=activity)
+
+
     @self._client.command(name='weak')
     @commands.is_owner()
     async def _weak(ctx, *, monster_name):
