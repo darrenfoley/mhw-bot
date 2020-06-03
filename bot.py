@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
-from mhw_db import Monster
+import os
 
-class MHW:
+
+class Bot:
 
   def __init__(self, config):
 
@@ -10,6 +11,7 @@ class MHW:
     self._client = commands.Bot(command_prefix=self._config['discord']['prefix'])
     self._register_events()
     self._register_commands()
+    self._load_cogs()
 
 
 
@@ -28,39 +30,37 @@ class MHW:
 
   def _register_commands(self):
 
-    @self._client.command(name='echo')
+    @self._client.command(name='load')
     @commands.is_owner()
-    async def _echo(ctx, *, phrase):
-      await ctx.send(phrase)
+    async def _load(ctx, extension):
+      self._client.load_extension(f'cogs.{extension}')
+      await ctx.send(f'{extension} loaded')
 
 
-    @self._client.command(name='activity')
+    @self._client.command(name='unload')
     @commands.is_owner()
-    async def _activity(ctx, *, activity_name):
-      activity = discord.Activity(type=discord.ActivityType.listening, name=activity_name)
-      await self._client.change_presence(activity=activity)
+    async def _unload(ctx, extension):
+      self._client.unload_extension(f'cogs.{extension}')
+      await ctx.send(f'{extension} unloaded')
 
 
-    @self._client.command(name='weak')
+    @self._client.command(name='reload')
     @commands.is_owner()
-    async def _weak(ctx, *, monster_name):
-      monster = Monster(monster_name)
-      weaknesses = monster.weaknesses()
+    async def _reload(ctx, extension):
+      self._client.reload_extension(f'cogs.{extension}')
+      await ctx.send(f'{extension} reloaded')
 
-      if len(weaknesses) == 0:
-        await ctx.send(f'could not find weaknesses for {monster.name}')
-      else:
-        first = True
-        str_weaknesses = f'{monster.name}:\n'
-        star = '\\*'
-        for w in weaknesses:
-          str = f'  {w["element"]}: {star * w["stars"]}'
-          if w['condition'] is not None:
-            str += f' ({w["condition"]})'
-          if not first:
-            str_weaknesses += '\n'
-          else:
-            first = False
-          str_weaknesses += str
 
-        await ctx.send(str_weaknesses)
+    @self._client.command(name='reload_all')
+    @commands.is_owner()
+    async def _reload_all(ctx, extension):
+      self._load_cogs(reload=True)
+      await ctx.send('All cogs reloaded')
+
+
+
+  def _load_cogs(self, *, reload=False):
+    for file in os.listdir('./cogs'):
+      if file.endswith('.py'):
+        func = self._client.reload_extension if reload else self._client.load_extension
+        func(f'cogs.{file[:-3]}')
