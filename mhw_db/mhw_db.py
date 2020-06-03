@@ -1,4 +1,4 @@
-import requests
+import httpx
 import json
 
 class Client:
@@ -9,11 +9,15 @@ class Client:
 
 
 
-  def get(self, path, params):
+  async def get(self, path, params):
 
     url = self._url(path)
-    return requests.get(url, params=params)
+    async with httpx.AsyncClient() as client:
+      response = await client.get(url, params=params)
 
+    if response.status_code == 200:
+      return response.json()
+    return None
 
 
 
@@ -32,7 +36,7 @@ class Monster:
 
 
 
-  def weaknesses(self):
+  async def weaknesses(self):
 
     q = {
       'name': {
@@ -49,11 +53,8 @@ class Monster:
     }
 
     c = Client()
-    response = c.get(self._path(), params)
-    if response.status_code == 200:
-      _json = response.json()
-      if len(_json) > 0:
-        return _json
-
+    _json = await c.get(self._path(), params)
+    if _json is not None and len(_json) > 0:
+      return _json
     return []
 
