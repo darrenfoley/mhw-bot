@@ -12,28 +12,29 @@ class MHW(commands.Cog):
 
 
   @commands.command(name='weak')
-  @commands.has_role('mhwtest')
   async def _weak(self, ctx, *, monster_name):
 
     monster = Monster(monster_name)
-    weaknesses = monster.weaknesses()
-    if len(weaknesses) == 0:
+    monsters = monster.weaknesses()
+    if len(monsters) == 0:
       await ctx.send(f'could not find weaknesses for {monster.name}')
     else:
-      first = True
-      str_weaknesses = f'{monster.name}:\n'
       star = '\\*'
-      for w in weaknesses:
-        str = f'  {w["element"]}: {star * w["stars"]}'
-        if w['condition'] is not None:
-          str += f' ({w["condition"]})'
-        if not first:
-          str_weaknesses += '\n'
+      message = 'I found this...'
+      first_monster = True
+      for m in monsters:
+        if not first_monster:
+          message += '\n\n'
         else:
-          first = False
-        str_weaknesses += str
+          first_monster = False
+        message += f'\n**{m["name"]}:**\n'
+        for w in m['weaknesses']:
+          weakness_str = f'\n  {w["element"]}: {star * w["stars"]}'
+          if w['condition'] is not None:
+            weakness_str += f' ({w["condition"]})'
+          message += weakness_str
 
-      await ctx.send(str_weaknesses)
+      await ctx.send(message)
 
 
 

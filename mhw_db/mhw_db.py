@@ -32,13 +32,15 @@ class Monster:
 
 
 
-  # TODO: add error handling
   def weaknesses(self):
 
     q = {
-      'name': self.name,
+      'name': {
+        '$like': self.name + '%'
+      }
     }
     p = {
+      'name': True,
       'weaknesses': True
     }
     params = {
@@ -48,9 +50,10 @@ class Monster:
 
     c = Client()
     response = c.get(self._path(), params)
-    _json = response.json()
-    if len(_json) == 1:
-      if 'weaknesses' in _json[0]:
-        return _json[0]['weaknesses']
+    if response.status_code == 200:
+      _json = response.json()
+      if len(_json) > 0:
+        return _json
+
     return []
 
