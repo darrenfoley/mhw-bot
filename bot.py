@@ -52,5 +52,8 @@ class Bot:
     def _load_cogs(self, *, reload=False):
         for file in os.listdir('./cogs'):
             if file.endswith('.py'):
-                func = self._client.reload_extension if reload else self._client.load_extension
-                func(f'cogs.{file[:-3]}')
+                cog_path = f'cogs.{file[:-3]}'
+                if reload:
+                    self._client.reload_extension(cog_path)
+                else:
+                    self._client.load_extension(cog_path)
