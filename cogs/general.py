@@ -6,6 +6,11 @@ class General(commands.Cog):
     def __init__(self, client):
         self._client = client
 
+    @commands.Cog.listener()
+    async def on_ready(self):
+        activity = discord.Game('ghosting the handler')
+        await self._client.change_presence(activity=activity)
+
     @commands.command(name="activity")
     @commands.is_owner()
     async def _activity(self, ctx, *, activity_name):
