@@ -34,6 +34,7 @@ class Monster:
         }
         p = {
             'name': True,
+            'resistances': True,
             'weaknesses': True
         }
         params = {

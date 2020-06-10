@@ -1,3 +1,4 @@
+import discord
 from discord.ext import commands
 
 from mhw_db.mhw_db import Monster
@@ -19,22 +20,26 @@ class MHW(commands.Cog):
             if len(monsters) == 0:
                 await ctx.send(f'could not find weaknesses for {monster.name}')
             else:
-                star = '\\*'
-                message = 'I found this...'
-                first_monster = True
-                for m in monsters:
-                    if not first_monster:
-                        message += '\n\n'
-                    else:
-                        first_monster = False
-                    message += f'\n**{m["name"]}:**\n'
-                    for w in m['weaknesses']:
-                        weakness_str = f'\n  {w["element"]}: {star * w["stars"]}'
-                        if w['condition'] is not None:
-                            weakness_str += f' ({w["condition"]})'
-                        message += weakness_str
+                for m in monsters[:3]:
+                    light_blue = 0x0091ff
+                    embed = discord.Embed(title=m["name"], color=light_blue)
 
-                await ctx.send(message)
+                    for r in m['resistances']:
+                        if r['condition'] is not None:
+                            condition_str = f' ({r["condition"]})'
+                        else:
+                            condition_str = ''
+                        embed.add_field(name=r['element'], value='❌' + condition_str, inline=False)
+
+                    for w in m['weaknesses']:
+                        if w['condition'] is not None:
+                            condition_str = f' ({w["condition"]})'
+                        else:
+                            condition_str = ''
+                        embed.add_field(name=w['element'], value=('⭐' * w['stars']) + condition_str, inline=False)
+
+                    await ctx.send(embed=embed)
+
 
 
 def setup(client):
