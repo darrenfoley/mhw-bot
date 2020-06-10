@@ -1,3 +1,6 @@
+import json
+import os
+
 import discord
 from discord.ext import commands
 
@@ -40,6 +43,40 @@ class MHW(commands.Cog):
 
                     await ctx.send(embed=embed)
 
+    @commands.command(name='quest')
+    async def _quest(self, ctx, *, quest_name):
+        path = './data/quests.json'
+
+        if not os.path.exists(path):
+            await ctx.send('something went wrong')
+            print(f'path [{path}] does not exist')
+            return
+
+        # can i open file async?
+        with open(path, 'r') as f:
+            quests = json.load(f)
+
+        filtered_quests = {key: value for key, value in quests.items() if quest_name.lower() in key.lower()}
+
+        if len(filtered_quests) == 0:
+            await ctx.send(f'I couldn\'t find any quests for "{quest_name}"')
+            return
+
+        for key, value in filtered_quests.items():
+            light_blue = 0x0091ff
+            embed = discord.Embed(title=key, url=value['link'], colour=light_blue)
+            if value['category'] is not None:
+                description = value['category'][:-1] if value['category'].endswith('s') else value['category']
+                embed.description = description
+            if value['quote'] is not None:
+                embed.add_field(name='Description', value=value['quote'], inline=False)
+            if value['info'] is not None:
+                for info_key, info_values in value['info'].items():
+                    # TODO: is there a better way to sanitize crap out of these?
+                    v = ''.join(info_values)
+                    if len(v.strip()) != 0:
+                        embed.add_field(name=info_key, value=v, inline=False)
+            await ctx.send(embed=embed)
 
 
 def setup(client):

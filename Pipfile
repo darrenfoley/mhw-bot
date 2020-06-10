@@ -8,6 +8,8 @@ verify_ssl = true
 [packages]
 httpx = "*"
 "discord.py" = "*"
+lxml = "*"
+beautifulsoup4 = "*"
 
 [requires]
 python_version = "3.8"
